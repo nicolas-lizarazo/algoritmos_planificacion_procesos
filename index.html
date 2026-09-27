@@ -1,471 +1,284 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CPU Command Center · 5-Algorithm Grid</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El Invernadero del Planificador</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@300;400;700&display=swap"
-      rel="stylesheet"
-    />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=Caveat:wght@600&display=swap"
+    rel="stylesheet" />
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
 
-    <link rel="stylesheet" href="css/styles.css" />
-  </head>
+<body>
+  <!-- ═══ BOTÓN DE MODO (esquina) ═══ -->
+  <button id="mode-toggle" class="mode-toggle" type="button">
+    <span class="mode-toggle-icon" id="mode-icon">🌱</span>
+    <span class="mode-toggle-text">
+      <small>Modo</small>
+      <strong id="mode-label">Planificación</strong>
+    </span>
+  </button>
 
-  <body>
-    <div id="grid-overlay"></div>
-    <div id="scanline"></div>
+  <div class="page">
 
-    <div id="app">
-      <!-- ═══════════════ COMMAND BAR ═══════════════ -->
-      <header id="command-bar">
-        <div class="brand">
-          <div class="brand-icon">
-            <i class="fa-solid fa-microchip"></i>
-            <span class="brand-led"></span>
-          </div>
-          <div class="brand-text">
-            <h1>CPU COMMAND CENTER</h1>
-            <p>Multi-Algorithm Grid · 5 Parallel Simulations</p>
-          </div>
+    <!-- ═══ CABECERA ═══ -->
+    <header class="top-bar">
+      <div class="brand">
+        <span class="brand-emoji">🌿</span>
+        <div>
+          <h1>El Invernadero del Planificador</h1>
+          <p>Mira cómo la CPU reparte el agua entre tus procesos</p>
         </div>
+      </div>
 
-        <div class="clock-module">
-          <i class="fa-regular fa-clock"></i>
+      <div class="clock">
+        <span class="clock-label">Tiempo</span>
+        <span class="clock-value" id="clock-value">T+000</span>
+      </div>
+
+      <div class="transport">
+        <button id="btn-step"  class="btn" type="button" title="Avanza 1 tick">⏭ Paso</button>
+        <button id="btn-run"   class="btn btn-primary" type="button">▶ Regar</button>
+        <button id="btn-pause" class="btn" type="button" disabled>⏸ Pausa</button>
+        <button id="btn-reset" class="btn btn-ghost" type="button">↺ Reiniciar</button>
+
+        <label class="speed">
+          <span>Velocidad</span>
+          <input id="speed" type="range" min="1" max="10" value="5" />
+        </label>
+      </div>
+    </header>
+
+    <!-- ═══ CONFIGURACIÓN DE PLANTAS ═══ -->
+    <section class="setup" id="setup-scheduling">
+      <div class="setup-head">
+        <h2>Tus plantas <span class="hint">(Cada planta es un proceso)</span></h2>
+        <div class="setup-actions">
+          <label class="quantum">
+            <span>Quantum</span>
+            <input id="quantum" type="number" min="1" max="10" value="2" />
+          </label>
+          <button id="btn-add"      class="btn-add" type="button">+ Añadir</button>
+          <button id="btn-random"   class="btn-add" type="button">🎲 Aleatorio</button>
+          <button id="btn-scenario" class="btn-add" type="button">🧪 Escenario</button>
+        </div>
+      </div>
+      <div id="process-list" class="process-list"></div>
+    </section>
+
+    <!-- ═══ VISTA: PLANIFICACIÓN (5 jardines) ═══ -->
+    <main id="garden-grid" class="garden-grid">
+
+      <article class="garden-card" data-algo="FCFS">
+        <header class="garden-card-header">
+          <div><h3>FCFS</h3><p>Primero en llegar, primero regado</p></div>
+          <span class="garden-state" data-role="state">En espera</span>
+        </header>
+        <div class="garden-scene">
+          <div class="soil"></div>
+          <div class="watering-can" data-role="can">🚿</div>
+          <div class="plants" data-role="plants"></div>
+        </div>
+        <div class="garden-metrics">
+          <span>Espera <b data-role="wt">0.0</b></span>
+          <span>Retorno <b data-role="tat">0.0</b></span>
+          <span>CPU <b data-role="cpu">0%</b></span>
+          <span>Cambios <b data-role="cs">0</b></span>
+        </div>
+      </article>
+
+      <article class="garden-card" data-algo="SJF">
+        <header class="garden-card-header">
+          <div><h3>SJF</h3><p>La planta menos sedienta va primero</p></div>
+          <span class="garden-state" data-role="state">En espera</span>
+        </header>
+        <div class="garden-scene">
+          <div class="soil"></div>
+          <div class="watering-can" data-role="can">🚿</div>
+          <div class="plants" data-role="plants"></div>
+        </div>
+        <div class="garden-metrics">
+          <span>Espera <b data-role="wt">0.0</b></span>
+          <span>Retorno <b data-role="tat">0.0</b></span>
+          <span>CPU <b data-role="cpu">0%</b></span>
+          <span>Cambios <b data-role="cs">0</b></span>
+        </div>
+      </article>
+
+      <article class="garden-card" data-algo="SRTF">
+        <header class="garden-card-header">
+          <div><h3>SRTF</h3><p>Si llega una menos sedienta, suelta y la atiende</p></div>
+          <span class="garden-state" data-role="state">En espera</span>
+        </header>
+        <div class="garden-scene">
+          <div class="soil"></div>
+          <div class="watering-can" data-role="can">🚿</div>
+          <div class="plants" data-role="plants"></div>
+        </div>
+        <div class="garden-metrics">
+          <span>Espera <b data-role="wt">0.0</b></span>
+          <span>Retorno <b data-role="tat">0.0</b></span>
+          <span>CPU <b data-role="cpu">0%</b></span>
+          <span>Cambios <b data-role="cs">0</b></span>
+        </div>
+      </article>
+
+      <article class="garden-card" data-algo="RR">
+        <header class="garden-card-header">
+          <div><h3>Round Robin</h3><p>Un sorbo a cada una, por turnos</p></div>
+          <span class="garden-state" data-role="state">En espera</span>
+        </header>
+        <div class="garden-scene">
+          <div class="soil"></div>
+          <div class="watering-can" data-role="can">🚿</div>
+          <div class="plants" data-role="plants"></div>
+        </div>
+        <div class="garden-metrics">
+          <span>Espera <b data-role="wt">0.0</b></span>
+          <span>Retorno <b data-role="tat">0.0</b></span>
+          <span>CPU <b data-role="cpu">0%</b></span>
+          <span>Cambios <b data-role="cs">0</b></span>
+        </div>
+      </article>
+
+      <article class="garden-card" data-algo="PRIORITY">
+        <header class="garden-card-header">
+          <div><h3>Prioridades</h3><p>La más urgente se riega primero</p></div>
+          <span class="garden-state" data-role="state">En espera</span>
+        </header>
+        <div class="garden-scene">
+          <div class="soil"></div>
+          <div class="watering-can" data-role="can">🚿</div>
+          <div class="plants" data-role="plants"></div>
+        </div>
+        <div class="garden-metrics">
+          <span>Espera <b data-role="wt">0.0</b></span>
+          <span>Retorno <b data-role="tat">0.0</b></span>
+          <span>CPU <b data-role="cpu">0%</b></span>
+          <span>Cambios <b data-role="cs">0</b></span>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- ═══ VISTA: MEMORIA (canastas) ═══ -->
+    <main id="memory-grid" class="garden-grid hidden">
+      <section class="memory-panel">
+        <div class="memory-header">
           <div>
-            <div class="clock-label">Global Clock</div>
-            <div id="clock-display">T+000</div>
+            <h2>Memoria · Canastas de páginas</h2>
+            <p>Cadena de referencia: <code>[1,2,3,4,1,2,5,1,2,3,4,5]</code> · 3 canastas</p>
           </div>
-          <div class="clock-state">
-            <div class="clock-label">Estado</div>
-            <div id="run-state" class="state-idle">IDLE</div>
-          </div>
-        </div>
-
-        <nav id="mode-switcher">
-          <button class="mode-btn is-active" data-mode="sim">
-            <i class="fa-solid fa-table-cells-large"></i
-            ><span>Vista Paralela</span>
-          </button>
-          <button class="mode-btn" data-mode="challenge">
-            <i class="fa-solid fa-gamepad"></i><span>Humano vs CPU</span>
-          </button>
-          <button class="mode-btn" data-mode="starvation">
-            <i class="fa-solid fa-triangle-exclamation"></i
-            ><span>Inanición</span>
-          </button>
-          <button class="mode-btn" data-mode="trivia">
-            <i class="fa-solid fa-circle-question"></i><span>Trivia</span>
-          </button>
-        </nav>
-
-        <div id="transport">
-          <button id="btn-step" class="btn-ctrl" title="Paso a paso">
-            <i class="fa-solid fa-forward-step"></i>
-          </button>
-          <button
-            id="btn-run"
-            class="btn-ctrl btn-primary"
-            title="Ejecutar todas"
-          >
-            <i class="fa-solid fa-play"></i
-            ><span class="btn-label">RUN ALL</span>
-          </button>
-          <button id="btn-pause" class="btn-ctrl" title="Pausar" disabled>
-            <i class="fa-solid fa-pause"></i>
-          </button>
-          <button id="btn-reset" class="btn-ctrl btn-danger" title="Reiniciar">
-            <i class="fa-solid fa-rotate-left"></i>
-          </button>
-
-          <div class="speed-box">
-            <i class="fa-solid fa-gauge-high"></i>
-            <input id="speed-range" type="range" min="1" max="10" value="5" />
-            <span id="speed-label">5x</span>
+          <div class="memory-current">
+            Página actual: <b id="memory-page">—</b>
           </div>
         </div>
-      </header>
 
-      <!-- ═══════════════ PROCESS STRIP ═══════════════ -->
-      <section id="process-strip">
-        <div class="strip-header">
-          <div class="strip-title">
-            <i class="fa-solid fa-list-check"></i>
-            <span>Procesos</span>
-            <span id="process-count" class="count-badge">4</span>
-          </div>
+        <div id="memory-cards" class="memory-cards">
 
-          <div id="process-list"></div>
-
-          <template id="process-row-template">
-            <div class="process-row-compact">
-              <span class="pid-badge" data-role="badge">P0</span>
-              <label class="proc-field">
-                <span>Llegada</span>
-                <input
-                  type="number"
-                  data-role="arrival"
-                  min="0"
-                  max="99"
-                  value="0"
-                />
-              </label>
-              <label class="proc-field">
-                <span>Ráfaga</span>
-                <input
-                  type="number"
-                  data-role="burst"
-                  min="1"
-                  max="20"
-                  value="5"
-                />
-              </label>
-              <label class="proc-field">
-                <span>Prioridad</span>
-                <input
-                  type="number"
-                  data-role="priority"
-                  min="1"
-                  max="9"
-                  value="1"
-                />
-              </label>
-              <button
-                type="button"
-                class="row-remove"
-                data-role="remove"
-                title="Eliminar"
-              >
-                <i class="fa-solid fa-xmark"></i>
-              </button>
+          <article class="memory-card" data-algo="FIFO">
+            <header>
+              <h3>FIFO</h3>
+              <p>Sale la canasta más antigua</p>
+            </header>
+            <div class="baskets" data-role="baskets"></div>
+            <div class="memory-stats">
+              <span>Aciertos <b data-role="hits">0</b></span>
+              <span>Fallos <b data-role="faults">0</b></span>
             </div>
-          </template>
+          </article>
 
-          <div class="strip-actions">
-            <div class="quantum-box">
-              <span>Q</span>
-              <input
-                id="quantum-input"
-                type="number"
-                min="1"
-                max="10"
-                value="2"
-              />
+          <article class="memory-card" data-algo="LRU">
+            <header>
+              <h3>LRU</h3>
+              <p>Sale la que lleva más sin usarse</p>
+            </header>
+            <div class="baskets" data-role="baskets"></div>
+            <div class="memory-stats">
+              <span>Aciertos <b data-role="hits">0</b></span>
+              <span>Fallos <b data-role="faults">0</b></span>
             </div>
-            <button id="btn-add-process" class="btn-strip btn-neon">
-              <i class="fa-solid fa-plus"></i>Añadir
-            </button>
-            <button id="btn-randomize" class="btn-strip btn-violet">
-              <i class="fa-solid fa-dice"></i>Aleatorio
-            </button>
-            <button id="btn-load-scenario" class="btn-strip btn-amber">
-              <i class="fa-solid fa-flask"></i>Escenario
-            </button>
-          </div>
-        </div>
+          </article>
 
-        <div id="form-error" class="hidden">
-          <i class="fa-solid fa-circle-exclamation"></i
-          ><span id="form-error-text"></span>
+          <article class="memory-card" data-algo="OPTIMO">
+            <header>
+              <h3>Óptimo</h3>
+              <p>Con bola de cristal, sale la que no volverá</p>
+            </header>
+            <div class="baskets" data-role="baskets"></div>
+            <div class="memory-stats">
+              <span>Aciertos <b data-role="hits">0</b></span>
+              <span>Fallos <b data-role="faults">0</b></span>
+            </div>
+          </article>
+
         </div>
       </section>
+    </main>
 
-      <!-- ═══════════════ GRID 5 ALGORITMOS ═══════════════ -->
-      <main id="algo-grid">
-        <article class="algo-card" data-algo="FCFS">
-          <header class="algo-card-header">
-            <div class="algo-card-title">
-              <i class="fa-solid fa-arrow-right-to-bracket"></i
-              ><span>FCFS</span>
-            </div>
-            <span class="algo-card-state" data-role="state">IDLE</span>
-          </header>
-          <div class="algo-card-canvas" data-canvas="FCFS"></div>
-          <div class="algo-card-connector">
-            <span class="connector-label">RAM</span>
-            <div class="connector-line">
-              <div class="connector-pulse"></div>
-            </div>
-            <span class="connector-label">CPU</span>
-          </div>
-          <div class="algo-card-metrics">
-            <div class="metric-pill">
-              <span class="metric-pill-label">WT</span
-              ><span class="metric-pill-value" data-role="wt">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">TAT</span
-              ><span class="metric-pill-value" data-role="tat">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">CPU</span
-              ><span class="metric-pill-value" data-role="cpu">0%</span>
-            </div>
-          </div>
-          <div class="algo-card-progress">
-            <div class="algo-card-progress-bar" data-role="progress"></div>
-          </div>
-        </article>
-
-        <article class="algo-card" data-algo="SJF">
-          <header class="algo-card-header">
-            <div class="algo-card-title">
-              <i class="fa-solid fa-ruler"></i><span>SJF</span>
-            </div>
-            <span class="algo-card-state" data-role="state">IDLE</span>
-          </header>
-          <div class="algo-card-canvas" data-canvas="SJF"></div>
-          <div class="algo-card-connector">
-            <span class="connector-label">RAM</span>
-            <div class="connector-line">
-              <div class="connector-pulse"></div>
-            </div>
-            <span class="connector-label">CPU</span>
-          </div>
-          <div class="algo-card-metrics">
-            <div class="metric-pill">
-              <span class="metric-pill-label">WT</span
-              ><span class="metric-pill-value" data-role="wt">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">TAT</span
-              ><span class="metric-pill-value" data-role="tat">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">CPU</span
-              ><span class="metric-pill-value" data-role="cpu">0%</span>
-            </div>
-          </div>
-          <div class="algo-card-progress">
-            <div class="algo-card-progress-bar" data-role="progress"></div>
-          </div>
-        </article>
-
-        <article class="algo-card" data-algo="SRTF">
-          <header class="algo-card-header">
-            <div class="algo-card-title">
-              <i class="fa-solid fa-bolt"></i><span>SRTF</span>
-            </div>
-            <span class="algo-card-state" data-role="state">IDLE</span>
-          </header>
-          <div class="algo-card-canvas" data-canvas="SRTF"></div>
-          <div class="algo-card-connector">
-            <span class="connector-label">RAM</span>
-            <div class="connector-line">
-              <div class="connector-pulse"></div>
-            </div>
-            <span class="connector-label">CPU</span>
-          </div>
-          <div class="algo-card-metrics">
-            <div class="metric-pill">
-              <span class="metric-pill-label">WT</span
-              ><span class="metric-pill-value" data-role="wt">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">TAT</span
-              ><span class="metric-pill-value" data-role="tat">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">CPU</span
-              ><span class="metric-pill-value" data-role="cpu">0%</span>
-            </div>
-          </div>
-          <div class="algo-card-progress">
-            <div class="algo-card-progress-bar" data-role="progress"></div>
-          </div>
-        </article>
-
-        <article class="algo-card" data-algo="RR">
-          <header class="algo-card-header">
-            <div class="algo-card-title">
-              <i class="fa-solid fa-rotate"></i><span>Round Robin</span>
-            </div>
-            <span class="algo-card-state" data-role="state">IDLE</span>
-          </header>
-          <div class="algo-card-canvas" data-canvas="RR"></div>
-          <div class="algo-card-connector">
-            <span class="connector-label">RAM</span>
-            <div class="connector-line">
-              <div class="connector-pulse"></div>
-            </div>
-            <span class="connector-label">CPU</span>
-          </div>
-          <div class="algo-card-metrics">
-            <div class="metric-pill">
-              <span class="metric-pill-label">WT</span
-              ><span class="metric-pill-value" data-role="wt">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">TAT</span
-              ><span class="metric-pill-value" data-role="tat">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">CPU</span
-              ><span class="metric-pill-value" data-role="cpu">0%</span>
-            </div>
-          </div>
-          <div class="algo-card-progress">
-            <div class="algo-card-progress-bar" data-role="progress"></div>
-          </div>
-        </article>
-
-        <article class="algo-card" data-algo="PRIORITY">
-          <header class="algo-card-header">
-            <div class="algo-card-title">
-              <i class="fa-solid fa-star"></i><span>Prioridades</span>
-            </div>
-            <span class="algo-card-state" data-role="state">IDLE</span>
-          </header>
-          <div class="algo-card-canvas" data-canvas="PRIORITY"></div>
-          <div class="algo-card-connector">
-            <span class="connector-label">RAM</span>
-            <div class="connector-line">
-              <div class="connector-pulse"></div>
-            </div>
-            <span class="connector-label">CPU</span>
-          </div>
-          <div class="algo-card-metrics">
-            <div class="metric-pill">
-              <span class="metric-pill-label">WT</span
-              ><span class="metric-pill-value" data-role="wt">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">TAT</span
-              ><span class="metric-pill-value" data-role="tat">0.00</span>
-            </div>
-            <div class="metric-pill">
-              <span class="metric-pill-label">CPU</span
-              ><span class="metric-pill-value" data-role="cpu">0%</span>
-            </div>
-          </div>
-          <div class="algo-card-progress">
-            <div class="algo-card-progress-bar" data-role="progress"></div>
-          </div>
-        </article>
-      </main>
-
-      <!-- ═══════════════ ANALYTICS ═══════════════ -->
-      <footer id="analytics-panel">
-        <section class="analytics-comparison">
-          <div class="analytics-header">
-            <div class="analytics-title">
-              <i class="fa-solid fa-table-list"></i
-              ><span>Comparativa Global</span>
-            </div>
-            <button id="btn-compare-all" class="btn-mini">
-              <i class="fa-solid fa-bolt"></i>Recalcular
-            </button>
-          </div>
-          <div class="analytics-body">
-            <table id="comparison-table">
-              <thead>
-                <tr>
-                  <th>Algoritmo</th>
-                  <th class="text-right">WT Prom</th>
-                  <th class="text-right">TAT Prom</th>
-                  <th class="text-right">CPU</th>
-                  <th class="text-right">Ctx Sw</th>
-                  <th class="text-center">Inanición</th>
-                </tr>
-              </thead>
-              <tbody id="comparison-body"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="analytics-chart">
-          <div class="analytics-header">
-            <div class="analytics-title">
-              <i class="fa-solid fa-chart-area"></i
-              ><span>Evolución de Espera Media</span>
-            </div>
-          </div>
-          <div class="analytics-body">
-            <canvas id="cpu-chart"></canvas>
-          </div>
-        </section>
-      </footer>
-    </div>
-
-    <!-- ═══════════════ MODAL · CHALLENGE ═══════════════ -->
-    <div id="challenge-modal">
-      <div class="challenge-shell">
-        <header class="challenge-header">
-          <div class="challenge-header-title">
-            <i class="fa-solid fa-gamepad"></i>
-            <span>DESAFÍO · HUMANO vs CPU</span>
-          </div>
-          <button id="challenge-close" type="button" aria-label="Cerrar">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </header>
-        <div id="challenge-body" class="challenge-body"></div>
+    <!-- ═══ NARRADOR + TABLA ═══ -->
+    <footer class="bottom-panel">
+      <div class="narrator">
+        <span class="narrator-icon">💬</span>
+        <p id="narrator-text">Pulsa «Regar» para empezar la simulación.</p>
       </div>
-    </div>
 
-    <!-- ═══════════════ MODAL · TRIVIA ═══════════════ -->
-    <div id="trivia-modal">
-      <div class="challenge-shell">
-        <header class="challenge-header">
-          <div class="challenge-header-title">
-            <i class="fa-solid fa-circle-question"></i>
-            <span>TRIVIA · PLANIFICACIÓN</span>
-          </div>
-          <button id="trivia-close" type="button" aria-label="Cerrar">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </header>
-        <div id="trivia-body" class="challenge-body">
-          <div class="trivia-progress">
-            <span
-              >Pregunta <span id="trivia-index">1</span>/<span id="trivia-total"
-                >5</span
-              ></span
-            >
-            <span>Score: <span id="trivia-score">0</span></span>
-          </div>
-          <p id="trivia-question"></p>
-          <div id="trivia-options"></div>
-          <div id="trivia-feedback"></div>
-          <button id="trivia-next">
-            Siguiente <i class="fa-solid fa-arrow-right"></i>
-          </button>
-        </div>
+      <div class="metrics-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Algoritmo</th>
+              <th>Espera</th>
+              <th>Retorno</th>
+              <th>CPU</th>
+              <th>Cambios</th>
+            </tr>
+          </thead>
+          <tbody id="metrics-body"></tbody>
+        </table>
       </div>
-    </div>
+    </footer>
 
-    <!-- ═══════════════ OVERLAY INANICIÓN ═══════════════ -->
-    <div id="starvation-overlay">
-      <div class="warning-box">
-        <button id="starvation-close" type="button" aria-label="Cerrar aviso">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <div class="warning-title">RIESGO DE INANICIÓN</div>
-        <div id="starvation-detail">—</div>
+  </div>
+
+  <!-- ═══ PLANTILLAS ═══ -->
+  <template id="plant-template">
+    <div class="plant">
+      <div class="thirst-bar"><div class="thirst-fill"></div></div>
+      <div class="plant-body">
+        <div class="flower">🌸</div>
+        <div class="stem"></div>
+        <div class="leaf leaf-left"></div>
+        <div class="leaf leaf-right"></div>
       </div>
+      <div class="pot"></div>
+      <span class="plant-label">P1</span>
     </div>
+  </template>
 
-    <div id="toast-container"></div>
+  <template id="process-row-template">
+    <div class="process-row">
+      <span class="pid-badge">P1</span>
+      <label><span>Llegada</span><input type="number" data-role="arrival" min="0" max="99" value="0" /></label>
+      <label><span>Ráfaga</span><input type="number" data-role="burst" min="1" max="20" value="5" /></label>
+      <label><span>Prioridad</span><input type="number" data-role="priority" min="1" max="9" value="1" /></label>
+      <button class="row-remove" data-role="remove" type="button">✕</button>
+    </div>
+  </template>
 
-    <!-- ═══════════════ LIBS ═══════════════ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <template id="basket-template">
+    <div class="basket">
+      <div class="basket-contents"></div>
+      <div class="basket-label">Canasta</div>
+    </div>
+  </template>
 
-    <!-- ═══════════════ MÓDULOS ═══════════════ -->
-    <script src="js/algorithms.js"></script>
-    <script src="js/render3d.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/main.js"></script>
-  </body>
+  <script src="js/algorithms.js"></script>
+  <script src="js/main.js"></script>
+</body>
 </html>
