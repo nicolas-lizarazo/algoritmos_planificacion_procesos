@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,14 +16,32 @@
   </head>
 
   <body>
-    <!-- ═══ BOTÓN DE MODO (esquina) ═══ -->
-    <button id="mode-toggle" class="mode-toggle" type="button">
-      <span class="mode-toggle-icon" id="mode-icon">🌱</span>
-      <span class="mode-toggle-text">
-        <small>Modo</small>
-        <strong id="mode-label">Planificación</strong>
-      </span>
-    </button>
+    <!-- ═══ CONTROLES SUPERIORES ═══ -->
+    <div class="top-controls">
+      <button
+        id="help-toggle"
+        class="icon-btn"
+        type="button"
+        title="Atajos de teclado (?)"
+      >
+        ?
+      </button>
+      <button
+        id="theme-toggle"
+        class="icon-btn"
+        type="button"
+        title="Cambiar tema (D)"
+      >
+        🌙
+      </button>
+      <button id="mode-toggle" class="mode-toggle" type="button">
+        <span class="mode-toggle-icon" id="mode-icon">🌱</span>
+        <span class="mode-toggle-text">
+          <small>Modo</small>
+          <strong id="mode-label">Planificación</strong>
+        </span>
+      </button>
+    </div>
 
     <div class="page">
       <!-- ═══ CABECERA ═══ -->
@@ -36,31 +54,68 @@
           </div>
         </div>
 
-        <div class="clock">
+        <div class="clock" title="Tiempo de simulación (ticks)">
           <span class="clock-label">Tiempo</span>
           <span class="clock-value" id="clock-value">T+000</span>
         </div>
 
         <div class="transport">
-          <button id="btn-step" class="btn" type="button" title="Avanza 1 tick">
+          <button
+            id="btn-step"
+            class="btn"
+            type="button"
+            title="Avanza 1 tick (→)"
+          >
             ⏭ Paso
           </button>
-          <button id="btn-run" class="btn btn-primary" type="button">
+          <button
+            id="btn-run"
+            class="btn btn-primary"
+            type="button"
+            title="Regar / Pausar (Espacio)"
+          >
             ▶ Regar
           </button>
-          <button id="btn-pause" class="btn" type="button" disabled>
+          <button
+            id="btn-pause"
+            class="btn"
+            type="button"
+            disabled
+            title="Pausar (Espacio)"
+          >
             ⏸ Pausa
           </button>
-          <button id="btn-reset" class="btn btn-ghost" type="button">
+          <button
+            id="btn-reset"
+            class="btn btn-ghost"
+            type="button"
+            title="Reiniciar (R)"
+          >
             ↺ Reiniciar
           </button>
 
-          <label class="speed">
+          <label class="speed" title="Velocidad de la animación">
             <span>Velocidad</span>
             <input id="speed" type="range" min="1" max="10" value="5" />
           </label>
         </div>
       </header>
+
+      <!-- ═══ SCRUBBER DE TIEMPO ═══ -->
+      <section class="scrubber-bar" id="scrubber-bar">
+        <label class="scrubber">
+          <span class="scrubber-label">Tick</span>
+          <input
+            id="scrubber"
+            type="range"
+            min="0"
+            max="0"
+            value="0"
+            step="1"
+          />
+          <b id="scrubber-value">0</b>
+        </label>
+      </section>
 
       <!-- ═══ CONFIGURACIÓN DE PLANTAS ═══ -->
       <section class="setup" id="setup-scheduling">
@@ -69,7 +124,7 @@
             Tus plantas <span class="hint">(Cada planta es un proceso)</span>
           </h2>
           <div class="setup-actions">
-            <label class="quantum">
+            <label class="quantum" title="Rebanada de CPU en Round Robin">
               <span>Quantum</span>
               <input id="quantum" type="number" min="1" max="10" value="2" />
             </label>
@@ -77,7 +132,12 @@
             <button id="btn-random" class="btn-add" type="button">
               🎲 Aleatorio
             </button>
-            <button id="btn-scenario" class="btn-add" type="button">
+            <button
+              id="btn-scenario"
+              class="btn-add"
+              type="button"
+              title="Rota entre 3 escenarios distintos"
+            >
               🧪 Escenario
             </button>
           </div>
@@ -85,115 +145,235 @@
         <div id="process-list" class="process-list"></div>
       </section>
 
-      <!-- ═══ VISTA: PLANIFICACIÓN (5 jardines) ═══ -->
+      <!-- ═══ VISTA: PLANIFICACIÓN ═══ -->
       <main id="garden-grid" class="garden-grid">
         <article class="garden-card" data-algo="FCFS">
           <header class="garden-card-header">
             <div>
-              <h3>FCFS</h3>
+              <h3>
+                FCFS
+                <span
+                  class="tip-icon"
+                  data-tooltip="First-Come, First-Served · El primero en llegar se ejecuta primero. Simple, pero sufre el 'efecto convoy' si un proceso largo bloquea a muchos cortos."
+                  >?</span
+                >
+              </h3>
               <p>Primero en llegar, primero regado</p>
             </div>
-            <span class="garden-state" data-role="state">En espera</span>
+            <div class="header-badges">
+              <span
+                class="garden-warn hidden"
+                data-role="warn"
+                title="Riesgo de inanición"
+                >⚠️</span
+              >
+              <span class="garden-state" data-role="state">En espera</span>
+            </div>
           </header>
           <div class="garden-scene">
             <div class="soil"></div>
             <div class="watering-can" data-role="can">🚿</div>
             <div class="plants" data-role="plants"></div>
           </div>
+          <div class="gantt" data-role="gantt"></div>
           <div class="garden-metrics">
-            <span>Espera <b data-role="wt">0.0</b></span>
-            <span>Retorno <b data-role="tat">0.0</b></span>
-            <span>CPU <b data-role="cpu">0%</b></span>
-            <span>Cambios <b data-role="cs">0</b></span>
+            <span title="Tiempo medio que un proceso espera en cola"
+              >Espera <b data-role="wt">0.0</b></span
+            >
+            <span title="Tiempo medio desde llegada hasta finalización"
+              >Retorno <b data-role="tat">0.0</b></span
+            >
+            <span title="Porcentaje del tiempo en que la CPU estuvo ocupada"
+              >CPU <b data-role="cpu">0%</b></span
+            >
+            <span title="Número total de cambios de contexto"
+              >Cambios <b data-role="cs">0</b></span
+            >
           </div>
         </article>
 
         <article class="garden-card" data-algo="SJF">
           <header class="garden-card-header">
             <div>
-              <h3>SJF</h3>
+              <h3>
+                SJF
+                <span
+                  class="tip-icon"
+                  data-tooltip="Shortest Job First · Se ejecuta primero el proceso con la ráfaga más corta. Minimiza la espera media, pero puede causar inanición de los procesos largos."
+                  >?</span
+                >
+              </h3>
               <p>La planta menos sedienta va primero</p>
             </div>
-            <span class="garden-state" data-role="state">En espera</span>
+            <div class="header-badges">
+              <span
+                class="garden-warn hidden"
+                data-role="warn"
+                title="Riesgo de inanición"
+                >⚠️</span
+              >
+              <span class="garden-state" data-role="state">En espera</span>
+            </div>
           </header>
           <div class="garden-scene">
             <div class="soil"></div>
             <div class="watering-can" data-role="can">🚿</div>
             <div class="plants" data-role="plants"></div>
           </div>
+          <div class="gantt" data-role="gantt"></div>
           <div class="garden-metrics">
-            <span>Espera <b data-role="wt">0.0</b></span>
-            <span>Retorno <b data-role="tat">0.0</b></span>
-            <span>CPU <b data-role="cpu">0%</b></span>
-            <span>Cambios <b data-role="cs">0</b></span>
+            <span title="Tiempo medio que un proceso espera en cola"
+              >Espera <b data-role="wt">0.0</b></span
+            >
+            <span title="Tiempo medio desde llegada hasta finalización"
+              >Retorno <b data-role="tat">0.0</b></span
+            >
+            <span title="Porcentaje del tiempo en que la CPU estuvo ocupada"
+              >CPU <b data-role="cpu">0%</b></span
+            >
+            <span title="Número total de cambios de contexto"
+              >Cambios <b data-role="cs">0</b></span
+            >
           </div>
         </article>
 
         <article class="garden-card" data-algo="SRTF">
           <header class="garden-card-header">
             <div>
-              <h3>SRTF</h3>
+              <h3>
+                SRTF
+                <span
+                  class="tip-icon"
+                  data-tooltip="Shortest Remaining Time First · Versión apropiativa de SJF: si llega un proceso con menos tiempo restante, se cambia a él. Óptimo en espera media, pero muchos cambios de contexto."
+                  >?</span
+                >
+              </h3>
               <p>Si llega una menos sedienta, suelta y la atiende</p>
             </div>
-            <span class="garden-state" data-role="state">En espera</span>
+            <div class="header-badges">
+              <span
+                class="garden-warn hidden"
+                data-role="warn"
+                title="Riesgo de inanición"
+                >⚠️</span
+              >
+              <span class="garden-state" data-role="state">En espera</span>
+            </div>
           </header>
           <div class="garden-scene">
             <div class="soil"></div>
             <div class="watering-can" data-role="can">🚿</div>
             <div class="plants" data-role="plants"></div>
           </div>
+          <div class="gantt" data-role="gantt"></div>
           <div class="garden-metrics">
-            <span>Espera <b data-role="wt">0.0</b></span>
-            <span>Retorno <b data-role="tat">0.0</b></span>
-            <span>CPU <b data-role="cpu">0%</b></span>
-            <span>Cambios <b data-role="cs">0</b></span>
+            <span title="Tiempo medio que un proceso espera en cola"
+              >Espera <b data-role="wt">0.0</b></span
+            >
+            <span title="Tiempo medio desde llegada hasta finalización"
+              >Retorno <b data-role="tat">0.0</b></span
+            >
+            <span title="Porcentaje del tiempo en que la CPU estuvo ocupada"
+              >CPU <b data-role="cpu">0%</b></span
+            >
+            <span title="Número total de cambios de contexto"
+              >Cambios <b data-role="cs">0</b></span
+            >
           </div>
         </article>
 
         <article class="garden-card" data-algo="RR">
           <header class="garden-card-header">
             <div>
-              <h3>Round Robin</h3>
+              <h3>
+                Round Robin
+                <span
+                  class="tip-icon"
+                  data-tooltip="Round Robin · Cada proceso recibe un quantum de CPU y vuelve al final de la cola. Justo y sin inanición, pero el rendimiento depende del tamaño del quantum."
+                  >?</span
+                >
+              </h3>
               <p>Un sorbo a cada una, por turnos</p>
             </div>
-            <span class="garden-state" data-role="state">En espera</span>
+            <div class="header-badges">
+              <span
+                class="garden-warn hidden"
+                data-role="warn"
+                title="Riesgo de inanición"
+                >⚠️</span
+              >
+              <span class="garden-state" data-role="state">En espera</span>
+            </div>
           </header>
           <div class="garden-scene">
             <div class="soil"></div>
             <div class="watering-can" data-role="can">🚿</div>
             <div class="plants" data-role="plants"></div>
           </div>
+          <div class="gantt" data-role="gantt"></div>
           <div class="garden-metrics">
-            <span>Espera <b data-role="wt">0.0</b></span>
-            <span>Retorno <b data-role="tat">0.0</b></span>
-            <span>CPU <b data-role="cpu">0%</b></span>
-            <span>Cambios <b data-role="cs">0</b></span>
+            <span title="Tiempo medio que un proceso espera en cola"
+              >Espera <b data-role="wt">0.0</b></span
+            >
+            <span title="Tiempo medio desde llegada hasta finalización"
+              >Retorno <b data-role="tat">0.0</b></span
+            >
+            <span title="Porcentaje del tiempo en que la CPU estuvo ocupada"
+              >CPU <b data-role="cpu">0%</b></span
+            >
+            <span title="Número total de cambios de contexto"
+              >Cambios <b data-role="cs">0</b></span
+            >
           </div>
         </article>
 
         <article class="garden-card" data-algo="PRIORITY">
           <header class="garden-card-header">
             <div>
-              <h3>Prioridades</h3>
+              <h3>
+                Prioridades
+                <span
+                  class="tip-icon"
+                  data-tooltip="Prioridades · Se ejecuta primero el proceso con mayor prioridad (número más alto). Puede causar inanición de procesos de baja prioridad si no se aplica envejecimiento."
+                  >?</span
+                >
+              </h3>
               <p>La más urgente se riega primero</p>
             </div>
-            <span class="garden-state" data-role="state">En espera</span>
+            <div class="header-badges">
+              <span
+                class="garden-warn hidden"
+                data-role="warn"
+                title="Riesgo de inanición"
+                >⚠️</span
+              >
+              <span class="garden-state" data-role="state">En espera</span>
+            </div>
           </header>
           <div class="garden-scene">
             <div class="soil"></div>
             <div class="watering-can" data-role="can">🚿</div>
             <div class="plants" data-role="plants"></div>
           </div>
+          <div class="gantt" data-role="gantt"></div>
           <div class="garden-metrics">
-            <span>Espera <b data-role="wt">0.0</b></span>
-            <span>Retorno <b data-role="tat">0.0</b></span>
-            <span>CPU <b data-role="cpu">0%</b></span>
-            <span>Cambios <b data-role="cs">0</b></span>
+            <span title="Tiempo medio que un proceso espera en cola"
+              >Espera <b data-role="wt">0.0</b></span
+            >
+            <span title="Tiempo medio desde llegada hasta finalización"
+              >Retorno <b data-role="tat">0.0</b></span
+            >
+            <span title="Porcentaje del tiempo en que la CPU estuvo ocupada"
+              >CPU <b data-role="cpu">0%</b></span
+            >
+            <span title="Número total de cambios de contexto"
+              >Cambios <b data-role="cs">0</b></span
+            >
           </div>
         </article>
       </main>
 
-      <!-- ═══ VISTA: MEMORIA (canastas) ═══ -->
+      <!-- ═══ VISTA: MEMORIA ═══ -->
       <main id="memory-grid" class="garden-grid hidden">
         <section class="memory-panel">
           <div class="memory-header">
@@ -211,7 +391,6 @@
             </div>
           </div>
 
-          <!-- ═══ CONTROLES DE CADENA ═══ -->
           <div class="memory-controls">
             <label class="chain-input">
               <span>Cadena de referencia (números separados por comas)</span>
@@ -283,28 +462,134 @@
         </section>
       </main>
 
-      <!-- ═══ NARRADOR + TABLA ═══ -->
+      <!-- ═══ NARRADOR + GRÁFICO + TABLA ═══ -->
       <footer class="bottom-panel">
         <div class="narrator">
           <span class="narrator-icon">💬</span>
           <p id="narrator-text">Pulsa «Regar» para empezar la simulación.</p>
         </div>
 
+        <section class="chart-panel" id="chart-panel">
+          <header class="chart-header">
+            <h2>
+              📊 Comparativa · <span id="chart-metric-label">Espera media</span>
+            </h2>
+            <div class="chart-tabs" id="chart-tabs">
+              <button
+                class="chart-tab is-active"
+                data-metric="avgWaiting"
+                data-label="Espera media"
+                data-mode="lower"
+                type="button"
+              >
+                Espera
+              </button>
+              <button
+                class="chart-tab"
+                data-metric="avgTurnaround"
+                data-label="Retorno medio"
+                data-mode="lower"
+                type="button"
+              >
+                Retorno
+              </button>
+              <button
+                class="chart-tab"
+                data-metric="avgResponse"
+                data-label="Tiempo de respuesta"
+                data-mode="lower"
+                type="button"
+              >
+                Respuesta
+              </button>
+              <button
+                class="chart-tab"
+                data-metric="cpuUtilization"
+                data-label="Uso de CPU"
+                data-mode="higher"
+                type="button"
+              >
+                CPU
+              </button>
+              <button
+                class="chart-tab"
+                data-metric="contextSwitches"
+                data-label="Cambios de contexto"
+                data-mode="lower"
+                type="button"
+              >
+                Cambios
+              </button>
+            </div>
+          </header>
+          <div class="chart-body" id="chart-body">
+            <p class="chart-empty">Pulsa «Regar» para ver la comparación.</p>
+          </div>
+          <p class="chart-legend" id="chart-legend">
+            Menor es mejor · ⭐ marca el algoritmo óptimo para esta métrica
+          </p>
+        </section>
+
         <div class="metrics-table">
           <table>
             <thead>
               <tr>
                 <th>Algoritmo</th>
-                <th>Espera</th>
-                <th>Retorno</th>
-                <th>CPU</th>
-                <th>Cambios</th>
+                <th title="Tiempo medio de espera">Espera</th>
+                <th title="Tiempo medio de retorno (llegada → fin)">Retorno</th>
+                <th
+                  title="Tiempo medio de respuesta (llegada → primera vez en CPU)"
+                >
+                  Respuesta
+                </th>
+                <th title="Uso de CPU">CPU</th>
+                <th title="Cambios de contexto">Cambios</th>
+                <th title="Riesgo de inanición">⚠️</th>
               </tr>
             </thead>
             <tbody id="metrics-body"></tbody>
           </table>
         </div>
       </footer>
+    </div>
+
+    <!-- ═══ MODAL DE AYUDA ═══ -->
+    <div
+      id="help-modal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="help-title"
+    >
+      <div class="modal-backdrop" data-role="modal-close"></div>
+      <div class="modal-content">
+        <header>
+          <h2 id="help-title">Atajos de teclado</h2>
+          <button
+            class="modal-close"
+            data-role="modal-close"
+            type="button"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </header>
+        <ul class="shortcut-list">
+          <li><kbd>Espacio</kbd><span>Regar / Pausar</span></li>
+          <li><kbd>→</kbd><span>Paso adelante</span></li>
+          <li><kbd>←</kbd><span>Paso atrás</span></li>
+          <li><kbd>R</kbd><span>Reiniciar</span></li>
+          <li><kbd>D</kbd><span>Modo oscuro</span></li>
+          <li>
+            <kbd>M</kbd><span>Cambiar modo (Planificación / Memoria)</span>
+          </li>
+          <li><kbd>1</kbd>–<kbd>5</kbd><span>Ir al algoritmo</span></li>
+          <li><kbd>?</kbd><span>Mostrar / ocultar esta ayuda</span></li>
+        </ul>
+        <p class="modal-hint">
+          Los atajos se desactivan mientras escribes en un campo de texto.
+        </p>
+      </div>
     </div>
 
     <!-- ═══ PLANTILLAS ═══ -->
